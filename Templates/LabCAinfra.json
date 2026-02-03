@@ -158,6 +158,7 @@
                     "computerName": "[variables('vmName')]",
                     "adminUsername": "[variables('adminUsername')]",
                     "adminPassword": "[variables('adminPassword')]",
+					"customData": "[base64(concat('#!/bin/bash\n','apt update -y\n','apt install apache2 -y\n', 'systemctl enable apache2\n', 'systemctl start apache2\n'))]",
                     "linuxConfiguration": {
                         "patchSettings": {
                             "patchMode": "ImageDefault"
