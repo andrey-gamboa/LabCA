@@ -178,4 +178,4 @@
             "value": "[variables('adminUsername')]"
         }
     }
-}s
+}
