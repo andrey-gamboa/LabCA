@@ -72,12 +72,16 @@
             "properties": {
                 "securityRules": [
 				  {
-					"name": "default-allow-22",
+					"name": "default-allow-2280443",
 					"properties": {
 					  "priority": 100,
 					  "access": "Allow",
 					  "direction": "Inbound",
-					  "destinationPortRange": "22",
+					  "destinationPortRange":[
+	                        "22",
+	                        "80",
+	                        "443"
+	                    ],
 					  "protocol": "Tcp",
 					  "sourceAddressPrefix": "[parameters('PublicIP')]",
 					  "sourcePortRange": "*",
