@@ -64,29 +64,42 @@
                 }
             }
         },
-        {
-            "name": "[variables('networkSecurityGroupName')]",
-            "type": "Microsoft.Network/networkSecurityGroups",
-            "apiVersion": "2020-05-01",
-            "location": "[variables('location')]",
-            "properties": {
-                "securityRules": [
-				  {
-					"name": "default-allow-22",
-					"properties": {
-					  "priority": 100,
-					  "access": "Allow",
-					  "direction": "Inbound",
-					  "destinationPortRange": "22",
-					  "protocol": "Tcp",
-					  "sourceAddressPrefix": "[parameters('PublicIP')]",
-					  "sourcePortRange": "*",
-					  "destinationAddressPrefix": "*"
-					}
-				  }
-				]
+{
+    "name": "[variables('networkSecurityGroupName')]",
+    "type": "Microsoft.Network/networkSecurityGroups",
+    "apiVersion": "2020-05-01",
+    "location": "[variables('location')]",
+    "properties": {
+        "securityRules": [
+            {
+                "name": "default-allow-22",
+                "properties": {
+                    "priority": 100,
+                    "access": "Allow",
+                    "direction": "Inbound",
+                    "destinationPortRange": "22",
+                    "protocol": "Tcp",
+                    "sourceAddressPrefix": "[parameters('PublicIP')]",
+                    "sourcePortRange": "*",
+                    "destinationAddressPrefix": "*"
+                }
+            },
+            {
+                "name": "default-allow-80",
+                "properties": {
+                    "priority": 110,
+                    "access": "Allow",
+                    "direction": "Inbound",
+                    "destinationPortRange": "80",
+                    "protocol": "Tcp",
+                    "sourceAddressPrefix": "[parameters('PublicIP')]",
+                    "sourcePortRange": "*",
+                    "destinationAddressPrefix": "*"
+                }
             }
-        },
+        ]
+    }
+},
         {
             "name": "[variables('vNetName')]",
             "type": "Microsoft.Network/virtualNetworks",
