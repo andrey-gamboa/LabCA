@@ -1,0 +1,310 @@
+{
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+		"PublicIP": {
+		  "type": "string",
+		  "metadata": {
+			"description": "Public Ip address for source in NSG."
+      		}
+	  	}
+    },
+    "variables": {
+        
+
+		"location": "[resourceGroup().location]",
+		"adminUsername": "azureuser",
+		"adminPassword": "Testing12345",
+		"enableAcceleratedNetworking": "False",
+		"networkSecurityGroupName": "EUS-NSG",
+		"virtualMachineRG": "[resourceGroup().name]",
+		"nsgId": "[resourceId(resourceGroup().name, 'Microsoft.Network/networkSecurityGroups', variables('networkSecurityGroupName'))]",
+		
+
+		"vNetName1": "VNET-A-EUS",
+		"vNetAddressPrefixes1": ["10.10.0.0/24"],
+		"vNetSubnetName1": "default",
+		"vNetSubnetAddressPrefix1": "10.10.0.0/24",
+		"vmName1": "VM-A-EUS",
+		"networkInterfaceName1": "[concat(variables('vmName1'), '-nic')]",
+		"pipName1": "[concat(variables('vmName1'), '-ip')]",
+		
+        "vnetId1": "[resourceId(resourceGroup().name,'Microsoft.Network/virtualNetworks', variables('vNetName1'))]",
+        "subnetRef1": "[concat(variables('vnetId1'), '/subnets/', variables('vNetSubnetName1'))]",
+		
+
+		"vNetName2": "VNET-B-EUS",
+		"vNetAddressPrefixes2": ["10.10.1.0/24"],
+		"vNetSubnetName2": "default",
+		"vNetSubnetAddressPrefix2": "10.10.1.0/24",
+		"vmName2": "VM-B-EUS",
+		"networkInterfaceName2": "[concat(variables('vmName2'), '-nic')]",
+		"pipName2": "[concat(variables('vmName2'), '-ip')]",
+		
+        "vnetId2": "[resourceId(resourceGroup().name,'Microsoft.Network/virtualNetworks', variables('vNetName2'))]",
+        "subnetRef2": "[concat(variables('vnetId2'), '/subnets/', variables('vNetSubnetName2'))]"
+    },
+    "resources": [
+        {
+            "name": "[variables('networkInterfaceName1')]",
+            "type": "Microsoft.Network/networkInterfaces",
+            "apiVersion": "2021-03-01",
+            "location": "[variables('location')]",
+            "dependsOn": [
+                "[concat('Microsoft.Network/networkSecurityGroups/', variables('networkSecurityGroupName'))]",
+                "[concat('Microsoft.Network/virtualNetworks/', variables('vNetName1'))]",
+                "[concat('Microsoft.Network/publicIpAddresses/', variables('pipName1'))]"
+            ],
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfig1",
+                        "properties": {
+                            "subnet": {
+                                "id": "[variables('subnetRef1')]"
+                            },
+                            "privateIPAllocationMethod": "Dynamic",
+                            "publicIpAddress": {
+                                "id": "[resourceId(resourceGroup().name, 'Microsoft.Network/publicIpAddresses', variables('pipName1'))]"
+                            }
+                        }
+                    }
+                ],
+                "enableAcceleratedNetworking": "[variables('enableAcceleratedNetworking')]",
+                "networkSecurityGroup": {
+                    "id": "[variables('nsgId')]"
+                }
+            }
+        },
+		{
+            "name": "[variables('networkInterfaceName2')]",
+            "type": "Microsoft.Network/networkInterfaces",
+            "apiVersion": "2021-03-01",
+            "location": "[variables('location')]",
+            "dependsOn": [
+                "[concat('Microsoft.Network/networkSecurityGroups/', variables('networkSecurityGroupName'))]",
+                "[concat('Microsoft.Network/virtualNetworks/', variables('vNetName2'))]",
+                "[concat('Microsoft.Network/publicIpAddresses/', variables('pipName2'))]"
+            ],
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfig1",
+                        "properties": {
+                            "subnet": {
+                                "id": "[variables('subnetRef2')]"
+                            },
+                            "privateIPAllocationMethod": "Dynamic",
+                            "publicIpAddress": {
+                                "id": "[resourceId(resourceGroup().name, 'Microsoft.Network/publicIpAddresses', variables('pipName2'))]"
+                            }
+                        }
+                    }
+                ],
+                "enableAcceleratedNetworking": "[variables('enableAcceleratedNetworking')]",
+                "networkSecurityGroup": {
+                    "id": "[variables('nsgId')]"
+                }
+            }
+        },
+        {
+            "name": "[variables('networkSecurityGroupName')]",
+            "type": "Microsoft.Network/networkSecurityGroups",
+            "apiVersion": "2019-02-01",
+            "location": "[variables('location')]",
+            "properties": {
+                "securityRules": [
+				  {
+					"name": "default-allow-22",
+					"properties": {
+					  "priority": 100,
+					  "access": "Allow",
+					  "direction": "Inbound",
+					  "destinationPortRange": "22",
+					  "protocol": "Tcp",
+					  "sourceAddressPrefix": "[parameters('PublicIP')]",
+					  "sourcePortRange": "*",
+					  "destinationAddressPrefix": "*"
+					}
+				  }
+				]
+            }
+        },
+        {
+            "name": "[variables('vNetName1')]",
+            "type": "Microsoft.Network/virtualNetworks",
+            "apiVersion": "2020-11-01",
+            "location": "[variables('location')]",
+            "properties": {
+                "addressSpace": {
+                    "addressPrefixes": "[variables('vNetAddressPrefixes1')]"
+                },
+                "subnets": [
+						{
+						"name": "[variables('vNetSubnetName1')]",
+						"properties": {
+						  "addressPrefix": "[variables('vNetSubnetAddressPrefix1')]"
+						}
+						}
+				]
+            }
+        },
+		{
+            "name": "[variables('vNetName2')]",
+            "type": "Microsoft.Network/virtualNetworks",
+            "apiVersion": "2020-11-01",
+            "location": "[variables('location')]",
+            "properties": {
+                "addressSpace": {
+                    "addressPrefixes": "[variables('vNetAddressPrefixes2')]"
+                },
+                "subnets": [
+						{
+						"name": "[variables('vNetSubnetName2')]",
+						"properties": {
+						  "addressPrefix": "[variables('vNetSubnetAddressPrefix2')]"
+						}
+						}
+				]
+            }
+        },
+        {
+            "name": "[variables('pipName1')]",
+            "type": "Microsoft.Network/publicIpAddresses",
+            "apiVersion": "2019-02-01",
+            "location": "[variables('location')]",
+            "properties": {
+                "publicIpAllocationMethod": "Static"
+            },
+            "sku": {
+                "name": "Standard"
+            },
+            "zones": [
+                "1"
+            ]
+        },
+		 {
+            "name": "[variables('pipName2')]",
+            "type": "Microsoft.Network/publicIpAddresses",
+            "apiVersion": "2019-02-01",
+            "location": "[variables('location')]",
+            "properties": {
+                "publicIpAllocationMethod": "Static"
+            },
+            "sku": {
+                "name": "Standard"
+            },
+            "zones": [
+                "1"
+            ]
+        },
+{
+            "name": "[variables('vmName1')]",
+            "type": "Microsoft.Compute/virtualMachines",
+            "apiVersion": "2021-07-01",
+            "location": "[variables('location')]",
+            "dependsOn": [
+                "[concat('Microsoft.Network/networkInterfaces/', variables('networkInterfaceName1'))]"
+            ],
+            "properties": {
+                "hardwareProfile": {
+                    "vmSize": "Standard_DS1_v2"
+                },
+                "storageProfile": {
+                    "osDisk": {
+                        "createOption": "fromImage",
+                        "managedDisk": {
+                            "storageAccountType": "Standard_LRS"
+                        }
+                    },
+                    "imageReference": {
+                        "publisher": "Canonical",
+                        "offer": "UbuntuServer",
+                        "sku": "18_04-lts-gen2",
+                        "version": "latest"
+                    }
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('networkInterfaceName1'))]"
+                        }
+                    ]
+                },
+                "osProfile": {
+                    "computerName": "[variables('vmName1')]",
+                    "adminUsername": "[variables('adminUsername')]",
+                    "adminPassword": "[variables('adminPassword')]",
+                    "linuxConfiguration": {
+                        "patchSettings": {
+                            "patchMode": "ImageDefault"
+                        }
+                    }
+                },
+                "diagnosticsProfile": {
+                    "bootDiagnostics": {
+                        "enabled": true
+                    }
+                }
+            }
+        },
+		
+		
+		{
+            "name": "[variables('vmName2')]",
+            "type": "Microsoft.Compute/virtualMachines",
+            "apiVersion": "2021-07-01",
+            "location": "[variables('location')]",
+            "dependsOn": [
+                "[concat('Microsoft.Network/networkInterfaces/', variables('networkInterfaceName2'))]"
+            ],
+            "properties": {
+                "hardwareProfile": {
+                    "vmSize": "Standard_DS1_v2"
+                },
+                "storageProfile": {
+                    "osDisk": {
+                        "createOption": "fromImage",
+                        "managedDisk": {
+                            "storageAccountType": "Standard_LRS"
+                        }
+                    },
+                    "imageReference": {
+                        "publisher": "Canonical",
+                        "offer": "UbuntuServer",
+                        "sku": "18_04-lts-gen2",
+                        "version": "latest"
+                    }
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('networkInterfaceName2'))]"
+                        }
+                    ]
+                },
+                "osProfile": {
+                    "computerName": "[variables('vmName2')]",
+                    "adminUsername": "[variables('adminUsername')]",
+                    "adminPassword": "[variables('adminPassword')]",
+                    "linuxConfiguration": {
+                        "patchSettings": {
+                            "patchMode": "ImageDefault"
+                        }
+                    }
+                },
+                "diagnosticsProfile": {
+                    "bootDiagnostics": {
+                        "enabled": true
+                    }
+                }
+            }
+        }	
+    ],
+    "outputs": {
+        "adminUsername": {
+            "type": "string",
+            "value": "[variables('adminUsername')]"
+        }
+    }
+}
