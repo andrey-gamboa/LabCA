@@ -1,1 +1,12 @@
-cloud-init.yaml
+#cloud-config
+package_update: true
+package_upgrade: true
+packages:
+  - curl
+  - ca-certificates
+
+runcmd:
+  - mkdir -p /opt/ca-lab/bootstrap
+  - curl -fsSL "https://raw.githubusercontent.com/andrey-gamboa/LabCA/main/bootstrap/bootstrap.sh" -o /opt/ca-lab/bootstrap/bootstrap.sh
+  - chmod +x /opt/ca-lab/bootstrap/bootstrap.sh
+  - /opt/ca-lab/bootstrap/bootstrap.sh 2>&1 | tee /var/log/labca-bootstrap.log
