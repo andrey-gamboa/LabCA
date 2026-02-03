@@ -171,7 +171,7 @@
                     "computerName": "[variables('vmName')]",
                     "adminUsername": "[variables('adminUsername')]",
                     "adminPassword": "[variables('adminPassword')]",
-					"customData": "[base64(concat('#cloud-config\n', reference(uri('https://raw.githubusercontent.com/andrey-gamboa/LabCA/main/Templates/cloud-init.yaml'))))]",
+					"customData": "[base64(uri('https://raw.githubusercontent.com/andrey-gamboa/LabCA/main/Templates/', 'cloud-init.yaml'))]",
                     "linuxConfiguration": {
                         "patchSettings": {
                             "patchMode": "ImageDefault"
