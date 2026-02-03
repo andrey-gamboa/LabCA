@@ -1,0 +1,53 @@
+#cloud-config
+package_update: true
+package_upgrade: true
+packages:
+  - apache2
+  - easy-rsa
+  - unzip
+  - wget
+
+runcmd:
+  # --- Install .NET SDK 8 ---
+  - wget https://packages.microsoft.com/config/ubuntu/22.04/packages-microsoft-prod.deb
+  - dpkg -i packages-microsoft-prod.deb
+  - apt update
+  - apt install -y dotnet-sdk-8.0
+
+  # --- Create PKI and app folders ---
+  - mkdir -p /opt/ca-lab/pki/{root,intermediate}
+  - mkdir -p /opt/ca-lab/app
+  - chown -R ubuntu:ubuntu /opt/ca-lab
+  - chmod 700 /opt/ca-lab/pki
+
+  # --- Deploy web app ---
+  # Example: downloading zip from GitHub
+  - wget -O /tmp/ca-web.zip https://github.com/your-repo/ca-web/archive/refs/heads/main.zip
+  - unzip /tmp/ca-web.zip -d /opt/ca-lab/app
+  - rm /tmp/ca-web.zip
+
+  # --- Configure Apache as reverse proxy ---
+  - a2enmod proxy proxy_http rewrite
+  - echo '<VirtualHost *:80>
+      ServerName localhost
+      ProxyPass "/" "http://localhost:5000/"
+      ProxyPassReverse "/" "http://localhost:5000/"
+    </VirtualHost>' > /etc/apache2/sites-available/000-default.conf
+  - systemctl restart apache2
+
+  # --- Create systemd service for the web app ---
+  - echo '[Unit]
+    Description=CA Lab Web App
+    After=network.target
+
+    [Service]
+    WorkingDirectory=/opt/ca-lab/app/ca-web
+    ExecStart=/usr/bin/dotnet /opt/ca-lab/app/ca-web/ca-web.dll
+    Restart=always
+    User=ubuntu
+    Environment=ASPNETCORE_ENVIRONMENT=Production
+
+    [Install]
+    WantedBy=multi-user.target' > /etc/systemd/system/ca-web.service
+  - systemctl enable ca-web
+  - systemctl start ca-web
