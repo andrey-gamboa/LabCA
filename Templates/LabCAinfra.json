@@ -171,7 +171,7 @@
                     "computerName": "[variables('vmName')]",
                     "adminUsername": "[variables('adminUsername')]",
                     "adminPassword": "[variables('adminPassword')]",
-					"customData": "[base64('#cloud-config\npackage_update: true\npackage_upgrade: true\npackages:\n  - curl\n  - ca-certificates\n\nruncmd:\n  - mkdir -p /opt/ca-lab\n  - curl -fsSL https://raw.githubusercontent.com/andrey-gamboa/LabCA/main/bootstrap/bootstrap.sh -o /opt/ca-lab/bootstrap.sh\n  - chmod +x /opt/ca-lab/bootstrap.sh\n  - /opt/ca-lab/bootstrap.sh 2>&1 | tee /var/log/labca-bootstrap.log\n')]",
+					"customData": "[base64('#cloud-config\npackage_update: true\npackage_upgrade: true\npackages:\n  - curl\n  - ca-certificates\n\nruncmd:\n  - mkdir -p /opt/ca-lab\n  - curl https://raw.githubusercontent.com/andrey-gamboa/LabCA/main/bootstrap/bootstrap.sh -o /opt/ca-lab/bootstrap.sh\n  - chmod +x /opt/ca-lab/bootstrap.sh\n  - /opt/ca-lab/bootstrap.sh 2>&1 | tee /var/log/labca-bootstrap.log\n')]",
                     "linuxConfiguration": {
                         "patchSettings": {
                             "patchMode": "ImageDefault"
