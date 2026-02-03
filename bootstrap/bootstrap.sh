@@ -1,3 +1,9 @@
+log() {
+  echo "[$(date -Is)] $*"
+}
+
+log "Installing system packages testandrey"
+
 #!/usr/bin/env bash
 set -euo pipefail
 
