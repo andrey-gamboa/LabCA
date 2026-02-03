@@ -83,7 +83,7 @@
 					  "sourcePortRange": "*",
 					  "destinationAddressPrefix": "*"
 					}
-				  }
+				  },
 					{
 					"name": "default-allow-80",
 					"properties": {
