@@ -1,1 +1,15 @@
 
+[Unit]
+Description=CA Lab Web App
+After=network.target
+
+[Service]
+WorkingDirectory=/opt/ca-lab/app/ca-web/publish
+ExecStart=/usr/bin/dotnet /opt/ca-lab/app/ca-web/publish/ca-web.dll
+Restart=always
+User=labcauser
+Environment=ASPNETCORE_URLS=http://127.0.0.1:5000
+Environment=ASPNETCORE_ENVIRONMENT=Production
+
+[Install]
+WantedBy=multi-user.target
