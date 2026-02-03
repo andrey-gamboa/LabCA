@@ -6,25 +6,32 @@ packages:
   - easy-rsa
   - unzip
   - wget
+  - curl
 
 runcmd:
-  # --- Install .NET SDK 8 ---
-  - wget https://packages.microsoft.com/config/ubuntu/22.04/packages-microsoft-prod.deb
-  - dpkg -i packages-microsoft-prod.deb
+  # --- Install .NET 8 SDK ---
+  - wget https://packages.microsoft.com/config/ubuntu/22.04/packages-microsoft-prod.deb -O /tmp/packages-microsoft-prod.deb
+  - dpkg -i /tmp/packages-microsoft-prod.deb
   - apt update
   - apt install -y dotnet-sdk-8.0
+  - rm /tmp/packages-microsoft-prod.deb
 
   # --- Create PKI and app folders ---
   - mkdir -p /opt/ca-lab/pki/{root,intermediate}
   - mkdir -p /opt/ca-lab/app
   - chown -R ubuntu:ubuntu /opt/ca-lab
-  - chmod 700 /opt/ca-lab/pki
+  - chmod -R 700 /opt/ca-lab/pki
 
-  # --- Deploy web app ---
-  # Example: downloading zip from GitHub
-  - wget -O /tmp/ca-web.zip https://github.com/your-repo/ca-web/archive/refs/heads/main.zip
-  - unzip /tmp/ca-web.zip -d /opt/ca-lab/app
-  - rm /tmp/ca-web.zip
+  # --- Create a minimal placeholder C# web app ---
+  - mkdir -p /opt/ca-lab/app/ca-web
+  - echo 'using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
+var builder = WebApplication.CreateBuilder(args);
+var app = builder.Build();
+app.MapGet("/", () => "CA Lab placeholder running!");
+app.Run();' > /opt/ca-lab/app/ca-web/Program.cs
+  - dotnet new web -n ca-web -o /opt/ca-lab/app/ca-web --force
+  - dotnet publish /opt/ca-lab/app/ca-web -c Release -o /opt/ca-lab/app/ca-web/publish
 
   # --- Configure Apache as reverse proxy ---
   - a2enmod proxy proxy_http rewrite
@@ -35,19 +42,25 @@ runcmd:
     </VirtualHost>' > /etc/apache2/sites-available/000-default.conf
   - systemctl restart apache2
 
-  # --- Create systemd service for the web app ---
+  # --- Create systemd service for the C# web app ---
   - echo '[Unit]
     Description=CA Lab Web App
     After=network.target
 
     [Service]
-    WorkingDirectory=/opt/ca-lab/app/ca-web
-    ExecStart=/usr/bin/dotnet /opt/ca-lab/app/ca-web/ca-web.dll
+    WorkingDirectory=/opt/ca-lab/app/ca-web/publish
+    ExecStart=/usr/bin/dotnet /opt/ca-lab/app/ca-web/publish/ca-web.dll
     Restart=always
     User=ubuntu
     Environment=ASPNETCORE_ENVIRONMENT=Production
 
     [Install]
     WantedBy=multi-user.target' > /etc/systemd/system/ca-web.service
+
+  - systemctl daemon-reload
   - systemctl enable ca-web
   - systemctl start ca-web
+
+  # --- Optional: verify services ---
+  - systemctl status apache2
+  - systemctl status ca-web
