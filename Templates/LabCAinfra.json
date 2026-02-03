@@ -137,14 +137,14 @@
                     "osDisk": {
                         "createOption": "fromImage",
                         "managedDisk": {
-                            "storageAccountType": "Premium_LRS"
+                            "storageAccountType": "Standard_LRS"
                         }
                     },
                     "imageReference": {
-                "publisher": "canonical",
-                "offer": "ubuntu-24_04-lts",
-                "sku": "server",
-                "version": "latest"
+                        "publisher": "Canonical",
+                        "offer": "UbuntuServer",
+                        "sku": "ubuntu-24_04-lts",
+                        "version": "latest"
                     }
                 },
                 "networkProfile": {
@@ -178,4 +178,4 @@
             "value": "[variables('adminUsername')]"
         }
     }
-}s
+}
