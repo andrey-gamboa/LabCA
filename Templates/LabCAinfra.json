@@ -72,16 +72,25 @@
             "properties": {
                 "securityRules": [
 				  {
-					"name": "default-allow-2280443",
+					"name": "default-allow-22",
 					"properties": {
 					  "priority": 100,
 					  "access": "Allow",
 					  "direction": "Inbound",
-					  "destinationPortRange":[
-	                        "22",
-	                        "80",
-	                        "443"
-	                    ],
+					  "destinationPortRange": "22",
+					  "protocol": "Tcp",
+					  "sourceAddressPrefix": "[parameters('PublicIP')]",
+					  "sourcePortRange": "*",
+					  "destinationAddressPrefix": "*"
+					}
+				  }
+				{
+					"name": "default-allow-80",
+					"properties": {
+					  "priority": 110,
+					  "access": "Allow",
+					  "direction": "Inbound",
+					  "destinationPortRange": "22",
 					  "protocol": "Tcp",
 					  "sourceAddressPrefix": "[parameters('PublicIP')]",
 					  "sourcePortRange": "*",
