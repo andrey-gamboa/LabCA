@@ -1,5 +1,5 @@
 {
-    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "$schema": "http://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json",
     "contentVersion": "1.0.0.0",
     "parameters": {
 		"PublicIP": {
@@ -21,12 +21,12 @@
 		"nsgId": "[resourceId(resourceGroup().name, 'Microsoft.Network/networkSecurityGroups', variables('networkSecurityGroupName'))]",
 		
 
-		"vNetName": "LabCAVNET",
+		"vNetName": "LabCA-VNET",
 		"vNetAddressPrefixes": ["10.10.0.0/24"],
 		"vNetSubnetName": "default",
 		"vNetSubnetAddressPrefix": "10.10.0.0/24",
 		"vmName": "LabCAServer",
-		"networkInterfaceName": "[concat(variables('vmName'), '-nic')]",
+		"networkInterfaceName": "[concat(variables('vmName'), '-Nic')]",
 		"pipName": "[concat(variables('vmName'), '-ip')]",
 		
         "vnetId": "[resourceId(resourceGroup().name,'Microsoft.Network/virtualNetworks', variables('vNetName'))]",
@@ -36,7 +36,7 @@
         {
             "name": "[variables('networkInterfaceName')]",
             "type": "Microsoft.Network/networkInterfaces",
-            "apiVersion": "2021-03-01",
+            "apiVersion": "2022-11-01",
             "location": "[variables('location')]",
             "dependsOn": [
                 "[concat('Microsoft.Network/networkSecurityGroups/', variables('networkSecurityGroupName'))]",
@@ -67,17 +67,17 @@
         {
             "name": "[variables('networkSecurityGroupName')]",
             "type": "Microsoft.Network/networkSecurityGroups",
-            "apiVersion": "2019-02-01",
+            "apiVersion": "2020-05-01",
             "location": "[variables('location')]",
             "properties": {
                 "securityRules": [
 				  {
-					"name": "default-allow-80",
+					"name": "default-allow-22",
 					"properties": {
 					  "priority": 100,
 					  "access": "Allow",
 					  "direction": "Inbound",
-					  "destinationPortRange": "80",
+					  "destinationPortRange": "22",
 					  "protocol": "Tcp",
 					  "sourceAddressPrefix": "[parameters('PublicIP')]",
 					  "sourcePortRange": "*",
@@ -90,7 +90,7 @@
         {
             "name": "[variables('vNetName')]",
             "type": "Microsoft.Network/virtualNetworks",
-            "apiVersion": "2020-11-01",
+            "apiVersion": "2024-10-01",
             "location": "[variables('location')]",
             "properties": {
                 "addressSpace": {
@@ -109,7 +109,7 @@
         {
             "name": "[variables('pipName')]",
             "type": "Microsoft.Network/publicIpAddresses",
-            "apiVersion": "2019-02-01",
+            "apiVersion": "2023-06-01",
             "location": "[variables('location')]",
             "properties": {
                 "publicIpAllocationMethod": "Static"
@@ -124,7 +124,7 @@
 {
             "name": "[variables('vmName')]",
             "type": "Microsoft.Compute/virtualMachines",
-            "apiVersion": "2021-07-01",
+            "apiVersion": "2024-03-01",
             "location": "[variables('location')]",
             "dependsOn": [
                 "[concat('Microsoft.Network/networkInterfaces/', variables('networkInterfaceName'))]"
@@ -137,13 +137,13 @@
                     "osDisk": {
                         "createOption": "fromImage",
                         "managedDisk": {
-                            "storageAccountType": "Premium_LRS"
+                            "storageAccountType": "Standard_LRS"
                         }
                     },
                     "imageReference": {
                         "publisher": "Canonical",
-                        "offer": "ubuntu-24_04-lts",
-                        "sku": "server",
+                        "offer": "UbuntuServer",
+                        "sku": "ubuntu-24_04-lts",
                         "version": "latest"
                     }
                 },
