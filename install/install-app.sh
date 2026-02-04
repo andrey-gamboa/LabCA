@@ -1,19 +1,22 @@
 #!/usr/bin/env bash
-set -euo pipefail
+set -Eeuo pipefail
 
 CA_USER="$(id -un 1000 2>/dev/null || echo labcauser)"
-APP_BASE="/opt/ca-lab/app"
+APP_DIR="/opt/ca-lab/app/ca-web"
+RAW_BASE="https://raw.githubusercontent.com/andrey-gamboa/LabCA/main/app/ca-web"
 
-mkdir -p "/opt/ca-lab/app/ca-web"
+mkdir -p "$APP_DIR"
 chown -R "$CA_USER:$CA_USER" /opt/ca-lab
 
-# Pull app source
-curl https://raw.githubusercontent.com/andrey-gamboa/LabCA/main/app/ca-web/ca-web.csproj -o /opt/ca-lab/app/ca-web/ca-web.csproj
+# Download BOTH files (and fail if not reachable)
+curl -fsSL "$RAW_BASE/ca-web.csproj" -o "$APP_DIR/ca-web.csproj"
+curl -fsSL "$RAW_BASE/Program.cs"   -o "$APP_DIR/Program.cs"
 
-chown -R "$CA_USER:$CA_USER" "$APP_BASE"
+# Sanity checks (prevent silent HTML / empty files)
+grep -q "<Project" "$APP_DIR/ca-web.csproj" || { echo "Bad csproj downloaded"; exit 10; }
+grep -q "WebApplication" "$APP_DIR/Program.cs" || { echo "Bad Program.cs downloaded"; exit 11; }
 
-sudo -u "$CA_USER" -H bash -lc "
-  dotnet publish $APP_BASE/ca-web/ca-web.csproj \
-    -c Release \
-    -o $APP_BASE/ca-web/publish
-"
+chown -R "$CA_USER:$CA_USER" "$APP_DIR"
+
+sudo -u "$CA_USER" -H bash -lc \
+"dotnet publish $APP_DIR/ca-web.csproj -c Release -o $APP_DIR/publish"
