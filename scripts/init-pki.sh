@@ -25,6 +25,14 @@ EMAIL="${8:-admin@example.local}"
 
 # ---------- Idempotency ----------
 if [[ -f "$ROOT/pki/ca.crt" && -f "$INT/pki/ca.crt" && -f "$INT/pki/private/ca.key" ]]; then
+  # Ensure intermediate DB exists even if CA was initialized previously (fix partial states)
+  mkdir -p "$INT/pki"/{issued,certs,private,reqs}
+  [[ -f "$INT/pki/index.txt" ]] || : > "$INT/pki/index.txt"
+  [[ -f "$INT/pki/index.txt.attr" ]] || : > "$INT/pki/index.txt.attr"
+  [[ -f "$INT/pki/serial" ]] || echo 1000 > "$INT/pki/serial"
+  [[ -f "$INT/pki/crlnumber" ]] || echo 1000 > "$INT/pki/crlnumber"
+  chmod 700 "$INT/pki/private" || true
+
   echo "✅ PKI already initialized"
   exit 0
 fi
@@ -70,7 +78,14 @@ cp "$ROOT/pki/issued/intermediate.crt" "$INT/pki/ca.crt"
 cp "$ROOT/pki/ca.crt" "$INT/pki/root-ca.crt"
 cat "$INT/pki/ca.crt" "$INT/pki/root-ca.crt" > "$INT/pki/ca-chain.crt"
 
+# ---------- Ensure intermediate CA DB exists (required for issuing certs) ----------
+mkdir -p "$INT/pki"/{issued,certs,private,reqs}
+: > "$INT/pki/index.txt"
+: > "$INT/pki/index.txt.attr"
+echo 1000 > "$INT/pki/serial"
+echo 1000 > "$INT/pki/crlnumber"
+chmod 700 "$INT/pki/private" || true
+
 echo "✅ PKI initialized successfully"
 echo "Root CA: $ROOT/pki/ca.crt"
 echo "Chain  : $INT/pki/ca-chain.crt"
-
