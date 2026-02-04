@@ -25,7 +25,7 @@ app.MapGet("/", () =>
     var sb = new StringBuilder();
     sb.AppendLine("<html><body style='font-family:Segoe UI,Arial'>");
     sb.AppendLine("<h2>Lab CA Server</h2>");
-    sb.AppendLine($"<p>Status: <b>{(PkiReady() ? "PKI READY ✅" : "NOT INITIALIZED ❌")}</b></p>");
+    sb.AppendLine($"<p>Status: <b>{(PkiReady() ? "READY" : "NOT INITIALIZED")}</b></p>");
 
     if (!PkiReady())
     {
@@ -47,7 +47,7 @@ app.MapGet("/", () =>
 app.MapGet("/setup", () =>
 {
     if (PkiReady())
-        return Results.Content("<html><body><h3>PKI already initialized ✅</h3><a href='/'>Home</a></body></html>", "text/html");
+        return Results.Content("<html><body><h3>PKI already initialized</h3><a href='/'>Home</a></body></html>", "text/html");
 
     var setupTokenEnabled = !string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("SETUP_TOKEN"));
 
@@ -134,13 +134,13 @@ app.MapPost("/setup", async (HttpRequest req) =>
 
     if (p.ExitCode != 0)
     {
-        var msg = $"<html><body><h3>Setup failed ❌</h3><pre>{H(stdout)}\n{H(stderr)}</pre><a href='/setup'>Back</a></body></html>";
+        var msg = $"<html><body><h3>Setup failed</h3><pre>{H(stdout)}\n{H(stderr)}</pre><a href='/setup'>Back</a></body></html>";
         return Results.Content(msg, "text/html");
     }
 
     var okMsg = $@"
 <html><body style='font-family:Segoe UI,Arial'>
-<h3>PKI initialized ✅</h3>
+<h3>PKI initialized</h3>
 <ul>
   <li><a href='/root.crt'>Download Root CA</a></li>
   <li><a href='/ca-chain.crt'>Download Chain</a></li>
