@@ -26,6 +26,9 @@ log "Downloading scripts"
 curl -fsSL "$REPO_RAW/scripts/init-pki.sh"   -o "$BASE/scripts/init-pki.sh"
 curl -fsSL "$REPO_RAW/scripts/issue-cert.sh" -o "$BASE/scripts/issue-cert.sh"
 
+log "Downloading systemd unit"
+curl -fsSL "$REPO_RAW/systemd/ca-web.service" -o "$BASE/install/ca-web.service"
+
 log "Changing file permissions"
 chmod +x $BASE/install/*.sh
 chmod +x $BASE/scripts/*.sh
