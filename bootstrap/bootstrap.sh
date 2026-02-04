@@ -33,4 +33,5 @@ $BASE/install/install-app.sh
 $BASE/install/install-systemd.sh
 $BASE/install/install-apache.sh
 
+ systemctl restart apache2
 echo "[BOOTSTRAP] Done"
