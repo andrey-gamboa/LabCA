@@ -29,6 +29,10 @@ curl -fsSL "$REPO_RAW/scripts/issue-cert.sh" -o "$BASE/scripts/issue-cert.sh"
 log "Downloading systemd unit"
 curl -fsSL "$REPO_RAW/systemd/ca-web.service" -o "$BASE/install/ca-web.service"
 
+log "Downloading apache file"
+curl -fsSL "$REPO_RAW/apache/000-default.conf" -o "$BASE/install/000-default.conf"
+
+
 log "Changing file permissions"
 chmod +x $BASE/install/*.sh
 chmod +x $BASE/scripts/*.sh
