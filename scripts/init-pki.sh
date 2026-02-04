@@ -79,7 +79,7 @@ cp "$ROOT/pki/ca.crt" "$INT/pki/root-ca.crt"
 cat "$INT/pki/ca.crt" "$INT/pki/root-ca.crt" > "$INT/pki/ca-chain.crt"
 
 # ---------- Ensure intermediate CA DB exists (required for issuing certs) ----------
-mkdir -p "$INT/pki"/{issued,certs,private,reqs}
+mkdir -p "$INT/pki"/{issued,certs,private,req,scerts_by_serial,certs_by_subject}
 : > "$INT/pki/index.txt"
 : > "$INT/pki/index.txt.attr"
 echo 1000 > "$INT/pki/serial"
@@ -89,3 +89,5 @@ chmod 700 "$INT/pki/private" || true
 echo "✅ PKI initialized successfully"
 echo "Root CA: $ROOT/pki/ca.crt"
 echo "Chain  : $INT/pki/ca-chain.crt"
+
+
