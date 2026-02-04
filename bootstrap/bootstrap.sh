@@ -32,9 +32,13 @@ chmod +x $BASE/scripts/*.sh
 
 log "Executing Installers"
 # --- Execute installers (order matters)
+log "Executing packages"
 $BASE/install/install-packages.sh
+log "Executing app"
 $BASE/install/install-app.sh
+log "Executing systemd"
 $BASE/install/install-systemd.sh
+log "Executing apache"
 $BASE/install/install-apache.sh
 
  systemctl restart apache2
